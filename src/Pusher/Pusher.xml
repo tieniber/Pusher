@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<widget id="Pusher.widget.Pusher" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+    <name>Pusher</name>
+    <description>The description of this widget.</description>
+
+    <icon />
+
+    <properties>
+        <property key="urlToOpen" type="string">
+            <caption>URL to open</caption>
+            <category>Behavior</category>
+            <description>Opens a new page with the given URL (can be a relative URL)</description>
+        </property>
+		<property key="pusherAPIKey" type="string">
+            <caption>API Key</caption>
+            <category>Behavior</category>
+            <description>API Key used to open a connection to Pusher.</description>
+        </property>
+        <property key="buttonCaption" type="string">
+            <caption>Caption</caption>
+            <category>Apperance</category>
+            <description>Caption shown in the button</description>
+        </property>
+		<property key="ignored1" type="object" isList="true" required="false">
+            <caption>Data listeners</caption>
+            <category>Data</category>
+            <description>Type of entities that you want to listen to.</description>
+            <properties>
+				<property key="dataEntity" type="entity" isPath="no" >
+					<caption>Data Entity</caption>
+					<category>Data</category>
+					<description>Entity to listen to</description>
+				</property>
+				<property key="channelName" type="string">
+					<caption>Channel name</caption>
+					<category>Data</category>
+					<description>Name of the channel to which to listen to.</description>
+				</property>
+            </properties>
+        </property>
+    </properties>
+</widget>
+
