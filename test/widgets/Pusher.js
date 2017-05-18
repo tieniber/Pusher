@@ -35,7 +35,7 @@ define([
     "dojo/_base/event",
 
     "dojo/text!Pusher/widget/template/Pusher.html",
-	"Pusher/lib/Pusher4"
+	"https://js.pusher.com/4.0/pusher.min.js"
 ], function (declare, _WidgetBase, _TemplatedMixin, dom, dojoDom, dojoProp, dojoGeometry, dojoClass, dojoStyle, dojoConstruct, dojoArray, dojoLang, dojoText, dojoHtml, dojoEvent, widgetTemplate, pusherLink) {
     "use strict";
 
@@ -48,7 +48,6 @@ define([
 
         // Parameters configured in the Modeler.
         pusherAPIKey:"",
-        cluster:"",
 
         // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
         _handles: null,
@@ -107,9 +106,6 @@ define([
         // mxui.widget._WidgetBase.uninitialize is called when the widget is destroyed. Implement to do special tear-down work.
         uninitialize: function () {
           logger.debug(this.id + ".uninitialize");
-          if (this._socket && typeof this._socket.disconnect === "function"){
-            this._socket.disconnect();
-          }
             // Clean up listeners, helper objects, etc. There is no need to remove listeners added with this.connect / this.subscribe / this.own.
         },
 
@@ -121,8 +117,7 @@ define([
         _setupEvents: function () {
             logger.debug(this.id + "._setupEvents");
             this._socket = new Pusher(this.pusherAPIKey,{
-                                                         encrypted: true,
-                                                         cluster: this.cluster
+                                                         encrypted: true
                                                         });
             this._channels.forEach(dojoLang.hitch(this, function (channel) {
                 var _channel = this._socket.subscribe(channel[0]);
