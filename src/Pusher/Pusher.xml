@@ -8,10 +8,13 @@
 	</icon>
 
     <properties>
-		<property key="pusherAPIKey" type="string">
+		<property key="pusherAPIKey" type="attribute">
             <caption>API Key</caption>
             <category>Behavior</category>
             <description>API Key used to open a connection to Pusher.</description>
+            <attributeTypes>
+                <attributeType name="String"/>
+            </attributeTypes>
         </property>
         <property key="cluster" type="enumeration" defaultValue="mt1">
             <caption>cluster</caption>

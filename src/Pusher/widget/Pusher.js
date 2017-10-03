@@ -35,7 +35,7 @@ define([
     "dojo/_base/event",
 
     "dojo/text!Pusher/widget/template/Pusher.html",
-	"Pusher/lib/Pusher4"
+    "Pusher/lib/Pusher4"
 ], function (declare, _WidgetBase, _TemplatedMixin, dom, dojoDom, dojoProp, dojoGeometry, dojoClass, dojoStyle, dojoConstruct, dojoArray, dojoLang, dojoText, dojoHtml, dojoEvent, widgetTemplate, pusherLink) {
     "use strict";
 
@@ -56,10 +56,13 @@ define([
         _socket: null,
         _readOnly: false,
         _channels: null,
+        _apiKey: null,
 
 		
         // dojo.declare.constructor is called to construct the widget instance. Implement to initialize non-primitive properties.
         constructor: function () {
+            // Uncomment the following line to enable debug messages
+            //logger.level(logger.DEBUG);
             logger.debug(this.id + ".constructor");
             this._handles = [];
             this._channels = [];
@@ -70,47 +73,45 @@ define([
             logger.debug(this.id + ".postCreate");
 
             if (this.readOnly || this.get("disabled") || this.readonly) {
-              this._readOnly = true;
+                this._readOnly = true;
             }
             dojoArray.forEach(this.ignored1, dojoLang.hitch(this, function (dataListener) {
                 this._channels.push([dataListener.channelName]);
             }));
             this._updateRendering();
-            this._setupEvents();
 
         },
 
         // mxui.widget._WidgetBase.update is called when context is changed or initialized. Implement to re-render and / or fetch data.
         update: function (obj, callback) {
             logger.debug(this.id + ".update");
-
             this._contextObj = obj;
+            this._setupPusher();
             this._resetSubscriptions();
             this._updateRendering(callback); // We're passing the callback to updateRendering to be called after DOM-manipulation
         },
 
         // mxui.widget._WidgetBase.enable is called when the widget should enable editing. Implement to enable editing if widget is input widget.
         enable: function () {
-          logger.debug(this.id + ".enable");
+            logger.debug(this.id + ".enable");
         },
 
         // mxui.widget._WidgetBase.enable is called when the widget should disable editing. Implement to disable editing if widget is input widget.
         disable: function () {
-          logger.debug(this.id + ".disable");
+            logger.debug(this.id + ".disable");
         },
 
         // mxui.widget._WidgetBase.resize is called when the page's layout is recalculated. Implement to do sizing calculations. Prefer using CSS instead.
-        resize: function (box) {
-          logger.debug(this.id + ".resize");
+        resize: function () {
+            logger.debug(this.id + ".resize");
         },
 
         // mxui.widget._WidgetBase.uninitialize is called when the widget is destroyed. Implement to do special tear-down work.
         uninitialize: function () {
-          logger.debug(this.id + ".uninitialize");
-          if (this._socket && typeof this._socket.disconnect === "function"){
-            this._socket.disconnect();
-          }
-            // Clean up listeners, helper objects, etc. There is no need to remove listeners added with this.connect / this.subscribe / this.own.
+            logger.debug(this.id + ".uninitialize");
+            if (this._socket && typeof this._socket.disconnect === "function"){
+                this._socket.disconnect();
+            }
         },
 
         _callRefresh: function(){
@@ -118,24 +119,40 @@ define([
         },
 
         // Attach events to HTML dom elements
-        _setupEvents: function () {
-            logger.debug(this.id + "._setupEvents");
-            this._socket = new Pusher(this.pusherAPIKey,{
-                                                         encrypted: true,
-                                                         cluster: this.cluster
-                                                        });
+        _setupPusher: function () {
+            logger.debug(this.id + "._setupPusher");
+            
+            // Throw an error if an empty apiKey is provided
+            if(!(this._contextObj && this._contextObj.get(this.pusherAPIKey) !== "")){
+                logger.error(this.id + ": 'API key' must be specified.");
+                return;
+            }
+            // Do nothing if apiKey did not change.
+            if(this._apiKey === this._contextObj.get(this.pusherAPIKey)){
+                return;
+            }
+            this._apiKey = this._contextObj.get(this.pusherAPIKey);
+            // close the current connection, if it exists.
+            if (this._socket && typeof this._socket.disconnect === "function"){
+                this._socket.disconnect();
+            }
+
+            this._socket = new Pusher(this._apiKey,{
+                encrypted: true,
+                cluster: this.cluster
+            });
             this._channels.forEach(dojoLang.hitch(this, function (channel) {
                 var _channel = this._socket.subscribe(channel[0]);
-                _channel.bind('refresh_object', function(data) {
+                _channel.bind("refresh_object", function(data) {
                 //Implement logic here to refresh single object
-                    console.log(data);
+                    //console.log(data);
                     mx.data.setOrRetrieveMxObject(data);
                     mx.data.update({guid: data.guid});
                 });
-                _channel.bind('refresh_object_class', function(data) {
+                _channel.bind("refresh_object_class", function(data) {
                 //Implement logic here to refresh an object class
                     //mx.data.setOrRetrieveMxObject(data);
-                    console.log(data);
+                    //console.log(data);
                     mx.data.update({entity: data.objectType});
                 });       
             }));   
@@ -150,12 +167,12 @@ define([
 
         //Remove subscribtions
         _unsubscribe: function () {
-          if (this._handles) {
-              dojoArray.forEach(this._handles, function (handle) {
-                  this.unsubscribe(handle);
-              });
-              this._handles = [];
-          }
+            if (this._handles) {
+                dojoArray.forEach(this._handles, function (handle) {
+                    this.unsubscribe(handle);
+                });
+                this._handles = [];
+            }
         },
 
         // Reset subscriptions.
@@ -168,7 +185,7 @@ define([
             if (this._contextObj) {
                 var objectHandle = this.subscribe({
                     guid: this._contextObj.getGuid(),
-                    callback: dojoLang.hitch(this, function (guid) {
+                    callback: dojoLang.hitch(this, function () {
                         this._callRefresh();
                     })
                 });
@@ -178,9 +195,9 @@ define([
         },
 
         _executeCallback: function (cb) {
-          if (cb && typeof cb === "function") {
-            cb();
-          }
+            if (cb && typeof cb === "function") {
+                cb();
+            }
         }
     });
 });

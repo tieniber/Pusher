@@ -1,9 +1,12 @@
-test/javasource/
+test/javasource/*
+!test/javasource/pusher/
+test/javasource/pusher/*
+!test/javasource/pusher/actions/
+!test/javasource/pusher/helpers/
 test/deployment/
 test/.classpath
 test/.project
 test/theme/
-test/userlib/
 test/.classpath
 test/.project
 *.launch

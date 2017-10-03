@@ -1,6 +1,6 @@
 {
   "name": "Pusher",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Widget to receive push updates via Pusher",
   "license": "Apache 2",
   "author": "Pieter van de Braak",
@@ -14,6 +14,7 @@
     "gulp-intercept": "^0.1.0",
     "gulp-json-transform": "^0.4.2",
     "gulp-newer": "^1.3.0",
+    "gulp-plumber": "^1.1.0",
     "gulp-util": "^3.0.7",
     "gulp-zip": "^3.2.0",
     "gulp-jsvalidate": "^3.0.0",
@@ -23,7 +24,7 @@
   "engines": {
     "node": ">=5"
   },
-  "generatorVersion": "2.0.4",
+  "generatorVersion": "2.2.3",
   "paths": {
     "testProjectFolder": "./test/",
     "testProjectFileName": "Test.mpr"
