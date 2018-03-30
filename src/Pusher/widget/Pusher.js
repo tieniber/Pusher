@@ -146,12 +146,11 @@ define([
                 _channel.bind("refresh_object", function(data) {
                 //Implement logic here to refresh single object
                     //console.log(data);
-                    mx.data.setOrRetrieveMxObject(data);
+                    mx.data.updateInCache(data);
                     mx.data.update({guid: data.guid});
                 });
                 _channel.bind("refresh_object_class", function(data) {
                 //Implement logic here to refresh an object class
-                    //mx.data.setOrRetrieveMxObject(data);
                     //console.log(data);
                     mx.data.update({entity: data.objectType});
                 });       
