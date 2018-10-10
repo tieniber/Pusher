@@ -11,33 +11,31 @@ package pusher.actions;
 
 import com.mendix.systemwideinterfaces.core.IContext;
 import com.mendix.webui.CustomJavaAction;
+import pusher.proxies.constants.Constants;
 import com.pusher.rest.Pusher;
 import pusher.helpers.PusherFactory;
 import pusher.helpers.PusherMessage;
-import pusher.proxies.constants.Constants;
-import com.mendix.systemwideinterfaces.core.IMendixObject;
 
-/**
- * Send a refresh command to the provided channel. The object that is send is refreshed by ID, this requires that the client already has knowledge of the object otherwise it cannot be refreshed.
- */
-public class RefreshObjectByID extends CustomJavaAction<java.lang.Boolean>
+public class SendEvent extends CustomJavaAction<java.lang.Boolean>
 {
-	private IMendixObject AnyObject;
 	private java.lang.String Channel;
+	private java.lang.String Event;
+	private java.lang.String Data;
 
-	public RefreshObjectByID(IContext context, IMendixObject AnyObject, java.lang.String Channel)
+	public SendEvent(IContext context, java.lang.String Channel, java.lang.String Event, java.lang.String Data)
 	{
 		super(context);
-		this.AnyObject = AnyObject;
 		this.Channel = Channel;
+		this.Event = Event;
+		this.Data = Data;
 	}
 
 	@Override
 	public java.lang.Boolean executeAction() throws Exception
 	{
 		// BEGIN USER CODE
-		Pusher pusherObject = PusherFactory.getPusher(Constants.getappId(), Constants.getapiKey(), Constants.getappSecret(),Constants.getcluster());
-		pusherObject.trigger(this.Channel, "refresh_object", new PusherMessage(this.AnyObject,this.getContext()));
+		Pusher pusherObject = PusherFactory.getPusher(Constants.getappId(), Constants.getapiKey(), Constants.getappSecret(), Constants.getcluster());
+		pusherObject.trigger(this.Channel, this.Event, this.Data);
 		return true;
 		// END USER CODE
 	}
@@ -48,7 +46,7 @@ public class RefreshObjectByID extends CustomJavaAction<java.lang.Boolean>
 	@Override
 	public java.lang.String toString()
 	{
-		return "RefreshObjectByID";
+		return "SendEvent";
 	}
 
 	// BEGIN EXTRA CODE
