@@ -9,6 +9,8 @@ test/.project
 test/theme/
 test/.classpath
 test/.project
+test/.svn
+test/.mendix-cache
 *.launch
 *.tmp
 *.lock

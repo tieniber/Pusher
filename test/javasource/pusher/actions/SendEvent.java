@@ -14,15 +14,14 @@ import com.mendix.webui.CustomJavaAction;
 import pusher.proxies.constants.Constants;
 import com.pusher.rest.Pusher;
 import pusher.helpers.PusherFactory;
-import pusher.helpers.PusherMessage;
 
-public class SendEvent extends CustomJavaAction<java.lang.Boolean>
+public class sendEvent extends CustomJavaAction<java.lang.Boolean>
 {
 	private java.lang.String Channel;
 	private java.lang.String Event;
 	private java.lang.String Data;
 
-	public SendEvent(IContext context, java.lang.String Channel, java.lang.String Event, java.lang.String Data)
+	public sendEvent(IContext context, java.lang.String Channel, java.lang.String Event, java.lang.String Data)
 	{
 		super(context);
 		this.Channel = Channel;
@@ -46,7 +45,7 @@ public class SendEvent extends CustomJavaAction<java.lang.Boolean>
 	@Override
 	public java.lang.String toString()
 	{
-		return "SendEvent";
+		return "sendEvent";
 	}
 
 	// BEGIN EXTRA CODE

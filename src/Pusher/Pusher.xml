@@ -8,10 +8,15 @@
 	</icon>
 
     <properties>
-		<property key="pusherAPIKey" type="attribute">
+        <property key="pusherAPIKey" type="string">
             <caption>API Key</caption>
             <category>Behavior</category>
             <description>API Key used to open a connection to Pusher.</description>
+        </property>
+		<property key="pusherAPIKeyAttr" type="attribute" required="false">
+            <caption>API Key Attribute</caption>
+            <category>Behavior</category>
+            <description>(optional) Specify an API Key using an attribute of the context object.</description>
             <attributeTypes>
                 <attributeType name="String"/>
             </attributeTypes>
@@ -25,19 +30,14 @@
                 <enumerationValue key="ap2">ap-south-1</enumerationValue>
                 <enumerationValue key="eu">eu-west-1</enumerationValue>
                 <enumerationValue key="mt1">us-east-1</enumerationValue>
+                <enumerationValue key="us2">us-east-2</enumerationValue>
             </enumerationValues>
         </property>
-		<property key="ignored1" type="object" isList="true" required="false">
-            <caption>Channels</caption>
+		<property key="microflow" type="microflow">
+            <caption>Channel microflow</caption>
             <category>Data</category>
-            <description>List of channels that you want to listen to.</description>
-            <properties>
-				<property key="channelName" type="string">
-					<caption>Channel name</caption>
-					<category>Data</category>
-					<description>Name of the channel to which to listen to.</description>
-				</property>
-            </properties>
+            <description>Microflow to run when a message is received on this channel. The channel name will be the Mendix object ID of the context object.</description>
+            <returnType type="Void"></returnType>
         </property>
     </properties>
 </widget>

@@ -1,4 +1,4 @@
-/*global logger*/
+/*global logger,Pusher,define,require,mx*/
 /*
     DualScreen
     ========================
@@ -55,8 +55,9 @@ define([
         _contextObj: null,
         _socket: null,
         _readOnly: false,
-        _channels: null,
+
         _apiKey: null,
+        _channel: null,
 
 		
         // dojo.declare.constructor is called to construct the widget instance. Implement to initialize non-primitive properties.
@@ -65,7 +66,6 @@ define([
             //logger.level(logger.DEBUG);
             logger.debug(this.id + ".constructor");
             this._handles = [];
-            this._channels = [];
         },
 
         // dijit._WidgetBase.postCreate is called after constructing the widget. Implement to do extra setup work.
@@ -75,10 +75,6 @@ define([
             if (this.readOnly || this.get("disabled") || this.readonly) {
                 this._readOnly = true;
             }
-            dojoArray.forEach(this.ignored1, dojoLang.hitch(this, function (dataListener) {
-                this._channels.push([dataListener.channelName]);
-            }));
-            this._updateRendering();
 
         },
 
@@ -87,26 +83,10 @@ define([
             logger.debug(this.id + ".update");
             this._contextObj = obj;
             this._setupPusher();
-            this._resetSubscriptions();
-            this._updateRendering(callback); // We're passing the callback to updateRendering to be called after DOM-manipulation
+            //this._resetSubscriptions();
+            this._executeCallback(callback);
         },
 
-        // mxui.widget._WidgetBase.enable is called when the widget should enable editing. Implement to enable editing if widget is input widget.
-        enable: function () {
-            logger.debug(this.id + ".enable");
-        },
-
-        // mxui.widget._WidgetBase.enable is called when the widget should disable editing. Implement to disable editing if widget is input widget.
-        disable: function () {
-            logger.debug(this.id + ".disable");
-        },
-
-        // mxui.widget._WidgetBase.resize is called when the page's layout is recalculated. Implement to do sizing calculations. Prefer using CSS instead.
-        resize: function () {
-            logger.debug(this.id + ".resize");
-        },
-
-        // mxui.widget._WidgetBase.uninitialize is called when the widget is destroyed. Implement to do special tear-down work.
         uninitialize: function () {
             logger.debug(this.id + ".uninitialize");
             if (this._socket && typeof this._socket.disconnect === "function"){
@@ -121,17 +101,13 @@ define([
         // Attach events to HTML dom elements
         _setupPusher: function () {
             logger.debug(this.id + "._setupPusher");
-            
+            this._apiKey = this.pusherAPIKey;
+
             // Throw an error if an empty apiKey is provided
-            if(!(this._contextObj && this._contextObj.get(this.pusherAPIKey) !== "")){
-                logger.error(this.id + ": 'API key' must be specified.");
-                return;
+            if(this._contextObj && this.pusherAPIKeyAttr && this._contextObj.get(this.pusherAPIKeyAttr) !== ""){
+                this._apiKey = this._contextObj.get(this.pusherAPIKeyAttr);
             }
-            // Do nothing if apiKey did not change.
-            if(this._apiKey === this._contextObj.get(this.pusherAPIKey)){
-                return;
-            }
-            this._apiKey = this._contextObj.get(this.pusherAPIKey);
+            
             // close the current connection, if it exists.
             if (this._socket && typeof this._socket.disconnect === "function"){
                 this._socket.disconnect();
@@ -141,44 +117,42 @@ define([
                 encrypted: true,
                 cluster: this.cluster
             });
-            this._channels.forEach(dojoLang.hitch(this, function (channel) {
-                var _channel = this._socket.subscribe(channel[0]);
-                _channel.bind("refresh_object", function(data) {
-                //Implement logic here to refresh single object
-                    //console.log(data);
-                    mx.data.updateInCache(data);
-                    mx.data.update({guid: data.guid});
-                });
-                _channel.bind("refresh_object_class", function(data) {
-                //Implement logic here to refresh an object class
-                    //console.log(data);
-                    mx.data.update({entity: data.objectType});
-                });       
-            }));   
+            this._channel = this._socket.subscribe(this._contextObj.getGuid()); //channel name is context object GUID
+            this._channel.bind("call_microflow", this._call_microflow.bind(this)); 
+            this._channel.bind("refresh_object_class", this._refresh_object_class.bind(this)); 
+            this._channel.bind("refresh_object", this._refresh_object.bind(this)); 
         },
 
-        // Rerender the interface.
-        _updateRendering: function (callback) {
-            logger.debug(this.id + "._updateRendering");
-            // The callback, coming from update, needs to be executed, to let the page know it finished rendering
-            this._executeCallback(callback);
+        _call_microflow: function(/*data*/) {
+            mx.data.action({
+                params: {
+                    applyto: "selection",
+                    actionname: this.microflow,
+                    guids: [this._contextObj.getGuid()]
+                },
+                origin: this.mxform,
+                callback: function() {
+                },
+                error: function(error) {
+                    alert(error.message);
+                }
+            });
         },
 
-        //Remove subscribtions
-        _unsubscribe: function () {
-            if (this._handles) {
-                dojoArray.forEach(this._handles, function (handle) {
-                    this.unsubscribe(handle);
-                });
-                this._handles = [];
-            }
+        _refresh_object: function() {
+            //mx.data.updateInCache(data);
+            //mx.data.update({guid: data.guid});
+        },
+
+        _refresh_object_class: function() {
+            //mx.data.update({entity: data.objectType});
         },
 
         // Reset subscriptions.
         _resetSubscriptions: function () {
             logger.debug(this.id + "._resetSubscriptions");
             // Release handles on previous object, if any.
-            this._unsubscribe();
+            this.unsubscribeAll();
 
             // When a mendix object exists create subscribtions.
             if (this._contextObj) {
