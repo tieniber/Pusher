@@ -16,8 +16,6 @@ test/.mendix-cache
 *.lock
 .idea/
 
-dist/
-
 node_modules/
 .editorconfig
 *DS_Store*
